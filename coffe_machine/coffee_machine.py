@@ -55,35 +55,28 @@ def get_choice():
     return choice
 
 def print_report():
-    for key, value in resources.items():
-        print(f'{key}: {value}{units[key]}')
-    print(f'Money: ${machine_money:.2f}')
+    report = '\n'.join([f'{resource.capitalize()}: {amount}{units[resource]}' for resource, amount in resources.items()]) + f'\nMoney: ${machine_money:.2f}'
+    print(report)
 
 def is_resource_sufficient(drink):
-    ingredients = menu[drink]['ingredients']
-    for key, value in ingredients.items():
+    ingredients = menu[drink]['ingredients'].items()
+    for key, value in ingredients:
         if resources[key] < value:
             return False
     return True
 
 def get_coins():
-    prompt = 'How many '
-    coins = {
-        'quarters': get_integer(prompt + 'quarters? '),
-        'dimes': get_integer(prompt + 'dimes? '),
-        'nickles': get_integer(prompt + 'nickles? '),
-        'pennies': get_integer(prompt + 'pennies? ')
-    }
-    return coins
+    prompt = 'How many {0}? '
+    coins = ['quarters', 'dimes', 'nickles', 'pennies']
+    return {coin : get_integer(prompt.format(coin)) for coin in coins}
 
 def coin_to_value(coin):
-    coins = {
+    return {
         'quarters': 0.25,
         'dimes': 0.10,
         'nickles': 0.05,
         'pennies': 0.01
-    }
-    return coins[coin]
+    }[coin]
 
 def check_payment(coins, drink):
     money = 0
@@ -104,27 +97,27 @@ def check_payment(coins, drink):
         return False
 
 def prepare_drink(drink):
-    drink_ingredients = menu[drink]['ingredients']
-    for key, value in drink_ingredients.items():
+    drink_ingredients = menu[drink]['ingredients'].items()
+    for key, value in drink_ingredients:
         resources[key] -= value
     return f'Here is your {drink}'
 
 def main():
     off = False
     while not off:
-        choice = get_choice()
-        off = choice == actions[1]
-        if choice in menu.keys():
-            coins = get_coins()
-            if is_resource_sufficient(choice) and check_payment(coins, choice):
-                print(prepare_drink(choice))
-            else:
-                print('Not enough resources or insufficient money')
-        elif choice == actions[0]:
-            print_report()
-        else:
-            print('Invalid option. Try again.')
-
+        match get_choice():
+            case 'off':
+                off = True
+            case 'report':
+                print_report()
+            case 'latte':
+                prepare_drink('latte')
+            case 'cappucino':
+                prepare_drink('cappucino')
+            case 'espresso':
+                prepare_drink('espresso')
+            case _:
+                print('Invalid option. Try again')
 
 if __name__ == '__main__':
     main()
