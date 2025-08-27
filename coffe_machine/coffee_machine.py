@@ -62,8 +62,9 @@ def is_resource_sufficient(drink):
     ingredients = menu[drink]['ingredients'].items()
     for key, value in ingredients:
         if resources[key] < value:
-            return f'Sorry there is not enough {key}'
-    return None
+            print(f'Sorry there is not enough {key}')
+            return False
+    return True
 
 def get_coins():
     prompt = 'How many {0}? '
@@ -88,13 +89,15 @@ def check_payment(coins, drink):
     if money == drink_price:
         global machine_money
         machine_money += money
-        return None
+        return True
     elif money > drink_price:
         difference = money - drink_price
         machine_money += drink_price
-        return f'Here is ${round(difference, 2)} dollars in change.'
+        print(f'Here is ${round(difference, 2)} dollars in change.')
+        return True
     else:
-        return 'Sorry that\'s not enough money. Money refunded.'
+        print('Sorry that\'s not enough money. Money refunded.')
+        return False
 
 def prepare_drink(drink):
     drink_ingredients = menu[drink]['ingredients'].items()
@@ -103,16 +106,9 @@ def prepare_drink(drink):
     return f'Here is your {drink}'
 
 def make_drink(drink):
-    enough_resources = is_resource_sufficient(drink)
-    payment = check_payment(get_coins(), drink)
-    if enough_resources == None and not 'Sorry' in payment:
-        if payment:
-            print(payment)
-        print(prepare_drink(drink))
-    else:
-        if enough_resources:
-            print(enough_resources)
-        print(payment)
+    if is_resource_sufficient(drink):
+        if check_payment(get_coins(), drink):
+            prepare_drink(drink)
 
 def main():
     off = False
