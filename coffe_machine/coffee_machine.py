@@ -62,8 +62,8 @@ def is_resource_sufficient(drink):
     ingredients = menu[drink]['ingredients'].items()
     for key, value in ingredients:
         if resources[key] < value:
-            return False
-    return True
+            return f'Sorry there is not enough {key}'
+    return None
 
 def get_coins():
     prompt = 'How many {0}? '
@@ -85,22 +85,34 @@ def check_payment(coins, drink):
     for key, value in coins.items():
         money += (coin_to_value(key) * value)
 
-    if money >= drink_price:
+    if money == drink_price:
         global machine_money
         machine_money += money
-        return True
-    # elif money > drink_price:
-    #     difference = money - drink_price
-    #     machine_money += drink_price
-    #     return round(difference, 2)
+        return None
+    elif money > drink_price:
+        difference = money - drink_price
+        machine_money += drink_price
+        return f'Here is ${round(difference, 2)} dollars in change.'
     else:
-        return False
+        return 'Sorry that\'s not enough money. Money refunded.'
 
 def prepare_drink(drink):
     drink_ingredients = menu[drink]['ingredients'].items()
     for key, value in drink_ingredients:
         resources[key] -= value
     return f'Here is your {drink}'
+
+def make_drink(drink):
+    enough_resources = is_resource_sufficient(drink)
+    payment = check_payment(get_coins(), drink)
+    if enough_resources == None and not 'Sorry' in payment:
+        if payment:
+            print(payment)
+        print(prepare_drink(drink))
+    else:
+        if enough_resources:
+            print(enough_resources)
+        print(payment)
 
 def main():
     off = False
@@ -111,11 +123,11 @@ def main():
             case 'report':
                 print_report()
             case 'latte':
-                prepare_drink('latte')
+                make_drink('latte')
             case 'cappucino':
-                prepare_drink('cappucino')
+                make_drink('cappucino')
             case 'espresso':
-                prepare_drink('espresso')
+                make_drink('espresso')
             case _:
                 print('Invalid option. Try again')
 
